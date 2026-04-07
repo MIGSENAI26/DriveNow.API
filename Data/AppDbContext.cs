@@ -10,6 +10,9 @@ namespace DriveNow.API.Data
         }
 
         public DbSet<Cliente> Clientes { get; set; }
+        public DbSet<Agencia> Agencias { get; set; }
+        public DbSet<Veiculo> Veiculos { get; set; }
+        public DbSet<Locacao> Locacaos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
