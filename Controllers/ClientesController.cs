@@ -80,8 +80,8 @@ namespace DriveNow.API.Controllers
             return Ok(clienteExistente);
         }
 
-    [HttpDelete]
-        public async Task<IActionResult> DeletePaciente(int id)
+    [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCliente(int id)
         {
             var paciente = _context.Clientes.Find(id);
             if (paciente == null)

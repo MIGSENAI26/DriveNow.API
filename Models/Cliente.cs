@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Consultorio.Api.Service;
+using DriveNow.Api.Service;
 
 namespace DriveNow.API.Models
 {

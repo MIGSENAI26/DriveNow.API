@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
-namespace Consultorio.Api.Service
+namespace DriveNow.Api.Service
 {
     public class CpfAttribute : ValidationAttribute
     {

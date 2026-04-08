@@ -40,7 +40,7 @@ namespace DriveNow.API.Controllers
             }
             else
             {
-                BadRequest("CEP não encontrado");
+                return BadRequest("CEP não encontrado");
             }
 
             _context.Agencias.Add(agencia);
@@ -65,11 +65,17 @@ namespace DriveNow.API.Controllers
             var agenciaExistente = await _context.Agencias.FindAsync(agencia.Id);
             var endereco = await _viaCepService.BuscarEnderecoAsync(agencia.Cep);
             if (endereco != null)
+            {
                 if (agenciaExistente == null)
                 {
                     return NotFound();
                 }
-            
+            }
+            else
+            {
+                return BadRequest("CEP não encontrado");
+            }
+
             agenciaExistente.Logradouro = endereco.logradouro;
             agenciaExistente.Bairro = endereco.bairro;
             agenciaExistente.Localidade = endereco.localidade;
