@@ -12,6 +12,7 @@ namespace DriveNow.API.Controllers
     public class VeiculosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _webHost;
 
         public VeiculosController(AppDbContext context)
         {
@@ -44,12 +45,50 @@ namespace DriveNow.API.Controllers
             return Ok(veiculoDto);
         }
 
+        //[HttpPost]
+        //public async Task<ActionResult<Veiculo>> PostVeiculo(Veiculo veiculo)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
+        //    _context.Veiculos.Add(veiculo);
+        //    await _context.SaveChangesAsync();
+        //    return CreatedAtAction(nameof(GetVeiculo), new { id = veiculo.Id }, veiculo);
+        //}
+
         [HttpPost]
-        public async Task<ActionResult<Veiculo>> PostVeiculo(Veiculo veiculo)
+        public async Task<ActionResult<Veiculo>> PostVeiculo([FromForm] Veiculo veiculo)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            
+            if (veiculo.FotoUploadVeiculo != null)
+            {
+                string pastaImagens = Path.Combine(_webHost.WebRootPath, "imagens", "veiculos");
+
+                if (!Directory.Exists(pastaImagens))
+                {
+                    Directory.CreateDirectory(pastaImagens);
+                }
+
+                string nomeArquivo = Guid.NewGuid().ToString() + "_" + veiculo.FotoUploadVeiculo.FileName;
+                string caminhoArquivo = Path.Combine(pastaImagens, nomeArquivo);
+
+                using (var fileStream = new FileStream(caminhoArquivo, FileMode.Create))
+                {
+                    await veiculo.FotoUploadVeiculo.CopyToAsync(fileStream);
+                }
+
+                veiculo.FotoUrlVeiculo = "/imagens/veiculos/" + nomeArquivo;
+            }
+
+            
             _context.Veiculos.Add(veiculo);
             await _context.SaveChangesAsync();
+
+            
             return CreatedAtAction(nameof(GetVeiculo), new { id = veiculo.Id }, veiculo);
         }
 

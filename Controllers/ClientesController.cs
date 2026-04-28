@@ -11,6 +11,7 @@ namespace DriveNow.API.Controllers
     public class ClientesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IWebHostEnvironment _webHost;
 
         public ClientesController(AppDbContext context)
         {
@@ -35,20 +36,61 @@ namespace DriveNow.API.Controllers
             return Ok(cliente);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+        //[HttpPost]
+        //public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        //{
+        //    if (!ModelState.IsValid) return BadRequest(ModelState);
 
+        //    _context.Clientes.Add(cliente);
+        //    await _context.SaveChangesAsync();
+        //    return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
+        //}
+
+        [HttpPost]
+        public async Task<ActionResult<Cliente>> PostCliente([FromForm] Cliente cliente)
+        {
+            
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            
+            if (cliente.FotoUploadCliente != null)
+            {
+                
+                string pastaImagens = Path.Combine(_webHost.WebRootPath, "imagens", "clientes");
+
+                if (!Directory.Exists(pastaImagens))
+                {
+                    Directory.CreateDirectory(pastaImagens);
+                }
+
+                
+                string nomeArquivo = Guid.NewGuid().ToString() + "_" + cliente.FotoUploadCliente.FileName;
+                string caminhoArquivo = Path.Combine(pastaImagens, nomeArquivo);
+
+                using (var fileStream = new FileStream(caminhoArquivo, FileMode.Create))
+                {
+                    await cliente.FotoUploadCliente.CopyToAsync(fileStream);
+                }
+
+                
+                cliente.FotoUrlCliente = "/imagens/clientes/" + nomeArquivo;
+            }
+
+            
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
+
+           
             return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCliente(Cliente cliente, int id)
         {
-            // 1. Validação de segurança: o ID da URL deve ser o mesmo do objeto
+            
             if (id != cliente.Id)
             {
                 return BadRequest("O ID da URL não corresponde ao ID do corpo da requisição.");
@@ -56,7 +98,7 @@ namespace DriveNow.API.Controllers
 
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // 2. Busca o paciente no banco de dados
+            
             var clienteExistente = await _context.Clientes.FindAsync(id);
 
             if (clienteExistente == null)
